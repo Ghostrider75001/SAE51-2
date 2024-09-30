@@ -1,0 +1,50 @@
+version: '3.8'
+
+networks:
+  sae_net:
+    driver: bridge
+
+services:
+  nginx:
+    image: nginx:1.26.0
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./logs:/var/log/nginx
+    ports:
+      - "8080:80"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - sae_net
+
+  grafana:
+    image: grafana/grafana:9.5.1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - nginx
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - sae_net
+  loki:
+    image: grafana/loki:latest
+    command: -config.file=/home/kali/Desktop/SAE51_2/loki.yaml
+    volumes:
+      - ./loki.yaml:/home/kali/Desktop/SAE51_2/loki.yaml
+      - ./loki/index:/home/kali/Desktop/SAE51_2/index
+      - ./loki/chunks:/home/kali/Desktop/SAE51_2/chunks
+    networks:
+      - sae_net
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ./promtail.yaml:/etc/promtail/promtail.yaml
+      - ./logs:/var/log/nginx
+    command: -config.file=/etc/promtail/promtail.yaml
+    networks:
+      - sae_net

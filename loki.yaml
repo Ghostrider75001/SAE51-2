@@ -1,0 +1,29 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+ingester:
+  wal:
+    enabled: true
+    dir: /home/kali/Desktop/SAE51_2/wal
+  chunk_idle_period: 5m
+  chunk_block_size: 262144
+  max_chunk_age: 1h
+
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: boltdb-shipper
+      object_store: filesystem
+      schema: v11
+      index:
+        prefix: index_
+        period: 24h  # Changement ici pour 24 heures
+
+storage_config:
+  boltdb_shipper:
+    active_index_directory: /home/kali/Desktop/SAE51_2/index
+    shared_store: filesystem
+  filesystem:
+    directory: /home/kali/Desktop/SAE51_2/chunks
